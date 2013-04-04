@@ -1,0 +1,7 @@
+{
+  "name": "function_arguments",
+  "version": "0.0.0",
+  "description": "Node.js wrapper for linux seccomp_filter functionality",
+  "private": true,
+  "gypfile": true
+}
