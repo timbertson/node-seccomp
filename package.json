@@ -1,7 +1,10 @@
 {
-  "name": "function_arguments",
-  "version": "0.0.0",
+  "name": "seccomp",
+  "version": "0.1.0",
   "description": "Node.js wrapper for linux seccomp_filter functionality",
-  "private": true,
-  "gypfile": true
+  "gypfile": true,
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {"stratifiedjs": ">=0.14"},
+  "scripts": {"test": "sjs test/run.sjs"}
 }

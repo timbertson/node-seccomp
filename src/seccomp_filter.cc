@@ -14,11 +14,6 @@
 
 // Created by Vitaly "_Vi" Shukela; 2013; License=MIT
 
-// missing from seccomp.h? or is it private?
-extern "C" {
-  int seccomp_syscall_resolve_name(char*);
-}
-
 /* Workaround missing va_list version of seccomp_rule_add */
 static int seccomp_rule_add_hack(scmp_filter_ctx ctx, uint32_t action, 
     int syscall, unsigned int arg_cnt, struct scmp_arg_cmp *args) {
@@ -77,7 +72,10 @@ Handle<Value> Seccomp(const Arguments& args) {
   }
 
   Handle<Object> opts = Handle<Object>::Cast(args[0]);
-  Handle<Array> allowed_calls = Handle<Array>::Cast(opts->Get(String::New("allowed_calls")));
+  Handle<Array> allowed_calls = Handle<Array>::Cast(opts->Get(String::New("allowed_syscalls")));
+  if(allowed_calls->IsUndefined()) {
+    ERR("opts must include `allowed_syscalls`");
+  }
   Handle<Array> default_action_opt = Handle<Array>::Cast(opts->Get(String::New("default_action")));
 
   // ECHRNG, just to provide more or less noticable message when we block a syscall
@@ -96,8 +94,11 @@ Handle<Value> Seccomp(const Arguments& args) {
         } else if(default_action_opt->Equals(String::New("kill"))) {
           // printf("default: kill\n");
           default_action = SCMP_ACT_KILL;
+        } else if(default_action_opt->Equals(String::New("trap"))) {
+          // printf("default: trap\n");
+          default_action = SCMP_ACT_TRAP;
         } else {
-          ERR_STR("Unknown action. Expected 'allow' or 'write', got: ", Handle<String>::Cast(default_action_opt));
+          ERR_STR("Unknown action. Expected 'allow', 'kill' or 'trap', got: ", Handle<String>::Cast(default_action_opt));
         }
       } else if (default_action_opt->IsInt32()) {
         int errno_ = Handle<Int32>::Cast(default_action_opt)->Value();
@@ -126,14 +127,10 @@ Handle<Value> Seccomp(const Arguments& args) {
       Handle<Value> arrayElement = allowed_calls->Get(i);
       // printf("got elem\n");
       if(!arrayElement->IsString()) {
-        ERR("expected string");
+        ERR_INT("expected string at allowed_syscalls index ", i);
       }
  
       Handle<String> arg = Handle<String>::Cast(arrayElement);
-      if(arg.IsEmpty()) {
-        ERR("what?");
-      }
-
       STRBUF(arg);
       // printf("buf: %s\n", buf);
 
@@ -172,8 +169,8 @@ Handle<Value> Seccomp(const Arguments& args) {
               if(!strncmp(aa+2, "&&", 2)) cmp=SCMP_CMP_MASKED_EQ;
                   
               if (!cmp) {
-                  ERR_STR("After An there should be comparison operator like"
-                          " != << <= == => >> ot &&; in ", arg);
+                  ERR_STR("After an A[0-5] there should be comparison operator like"
+                          " != << <= == => >> or &&; in ", arg);
               }
               
               if (cmp != SCMP_CMP_MASKED_EQ) {
@@ -235,8 +232,7 @@ Handle<Value> Seccomp(const Arguments& args) {
 }
 
 void Init(Handle<Object> exports) {
-  exports->Set(String::NewSymbol("enter"),
-      FunctionTemplate::New(Seccomp)->GetFunction());
+  exports->Set(String::NewSymbol("enter"), FunctionTemplate::New(Seccomp)->GetFunction());
 }
 
 NODE_MODULE(seccomp_filter, Init)
