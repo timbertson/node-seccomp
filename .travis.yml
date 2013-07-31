@@ -4,4 +4,5 @@ node_js:
 notifications:
   email: false
 script: "npm test"
-before_install: "sudo apt-get install -qq seccomp-dev"
+before_install:
+ - "sudo apt-get install -qq libseccomp-dev"
