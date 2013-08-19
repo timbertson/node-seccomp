@@ -1,11 +1,13 @@
 {
   "name": "seccomp",
   "version": "0.1.0",
+  "author": "tim@gfxmonk.net",
   "description": "Node.js wrapper for linux seccomp_filter functionality",
   "gypfile": true,
   "main": "index.js",
+  "licence":"MIT",
   "dependencies": {},
-  "devDependencies": {"stratifiedjs": ">=0.14"},
+  "devDependencies": {"stratifiedjs": ">=0.14", "errno":"*"},
   "repository": "git://github.com/gfxmonk/node-seccomp.git",
   "scripts": {"test": "sjs test/run.sjs"}
 }
