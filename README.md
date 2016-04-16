@@ -1,3 +1,4 @@
+<img src="http://gfxmonk.net/dist/status/project/node-seccomp.png">
 
 # What is it?
 
